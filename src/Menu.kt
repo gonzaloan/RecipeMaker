@@ -1,10 +1,28 @@
+import enums.IngredientsTypes
+import model.Cereal
+import model.Fruit
+import model.Recipe
 import kotlin.system.exitProcess
 
-val ingredients = listOf("FINISH", "Water", "Milk", "Meat", "Veggies", "Fruits", "Cereal", "Eggs", "Oil")
+val fruits = listOf(
+    Fruit("Strawberry"),
+    Fruit("Banana"),
+    Fruit("Grapes"),
+    Fruit("Apple"),
+    Fruit("Orange"),
+    Fruit("Pear"),
+    Fruit("Cherry")
+)
+val cereals = listOf(
+    Cereal("Wheat"),
+    Cereal("Oats"),
+    Cereal("Rice"),
+    Cereal("Corn")
+)
 
 fun main() {
 
-    var recipes = mutableListOf<String>()
+    val recipes = mutableListOf<Recipe>()
 
     do {
         println(
@@ -34,39 +52,96 @@ fun main() {
  * Creates Recipe with several ingredients
  * and return it.
  */
-fun createRecipe(): String {
+fun createRecipe(): Recipe {
 
     println(
         """
         ===========================
         ----- Create a Recipe -----
         These are the available ingredients:
-        Choose whatever you need and press 0 when you finish
+        Choose whatever you need and press EXIT when you finish
         
     """.trimIndent()
     )
-
-    ingredients.forEachIndexed { index, ingredient ->
-        println("$index - $ingredient")
-    }
-
-    var newRecipe = ""
+    var newRecipe = Recipe()
 
     do {
-        val response = readLine()?.toInt() ?: 0
 
-        val ingredient = ingredients[response];
-
-        println("You picked $ingredient")
-        if (response != 0) {
-            newRecipe = newRecipe.plus("$ingredient ")
+        IngredientsTypes.values().forEach {
+            println("${it.ordinal} - ${it.name}")
         }
-    } while (response != 0)
+        val response: Int? = try {
+            readLine()?.toInt() ?: -1
+        } catch (e: NumberFormatException) {
+            -1
+        }
+        //Now we need to print every element of the List
+        when (response) {
+            0 -> {
+                do {
+                    fruits.forEachIndexed { index, element ->
+                        println("$index - ${element.name}")
+                    }
+                    println("Write EXIT to go back")
+                    val selectedFruit: Int = try {
+                        readLine()?.toInt() ?: -1
+                    } catch (e: NumberFormatException) {
+                        -1
+                    }
+                    if (selectedFruit != -1) {
+                        println("How quantity we need of ${fruits[selectedFruit].name}")
+                        val fruitQuantity: Int = try {
+                            readLine()?.toInt() ?: 0
+                        } catch (e: NumberFormatException) {
+                            0
+                        }
+                        newRecipe.add(Fruit(fruits[selectedFruit].name, fruitQuantity))
+                        println("${fruits[selectedFruit].name} Added Correctly.")
+                    }
+                } while (selectedFruit != -1)
 
-    return newRecipe.trimMargin()
+            }
+
+            1 -> {
+                do {
+                    cereals.forEachIndexed { index, element ->
+                        println("$index - ${element.name}")
+                    }
+                    println("Write EXIT to go back")
+                    val selectedCereal: Int = try {
+                        readLine()?.toInt() ?: -1
+                    } catch (e: NumberFormatException) {
+                        -1
+                    }
+                    if (selectedCereal != -1) {
+                        println("How quantity we need of ${cereals[selectedCereal].name}")
+                        val cerealQuantity: Int = try {
+                            readLine()?.toInt() ?: 0
+                        } catch (e: NumberFormatException) {
+                            0
+                        }
+                        newRecipe.add(Cereal(cereals[selectedCereal].name, cerealQuantity))
+                        println("${cereals[selectedCereal].name} Added Correctly.")
+                    }
+                } while (selectedCereal != -1)
+            }
+            else -> {
+                println("Back")
+                if (newRecipe.getIngredients().size != 0) {
+                    return newRecipe
+                }
+            }
+
+
+        }
+
+    } while (response != -1)
+
+    return newRecipe
 }
 
-fun listRecipes(recipes: List<String>) {
+
+fun listRecipes(recipes: MutableList<Recipe>) {
     println(
         """
         =====================
@@ -76,7 +151,7 @@ fun listRecipes(recipes: List<String>) {
 
     recipes.forEachIndexed { index, element ->
         println("------------")
-        println("Recipe number ${index.inc()} : $element")
+        println("Recipe number ${index.inc()} : ${element.toString()}")
         println("------------")
     }
 
